@@ -1,3 +1,5 @@
+package HM1;
+
 public class MainAll {
     public static void main(String[] args) {
 

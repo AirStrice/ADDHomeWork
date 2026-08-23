@@ -1,9 +1,13 @@
 public class Park {
 
     private String parkName;
+    private Attraction[] attractions;
+    private int attractionCount;
 
-    public Park(String parkName) {
+    public Park(String parkName, int maxAttractions) {
         this.parkName = parkName;
+        this.attractions = new Attraction[maxAttractions];
+        this.attractionCount = 0;
     }
 
     public String getParkName() {
@@ -12,6 +16,23 @@ public class Park {
 
     public void setParkName(String parkName) {
         this.parkName = parkName;
+    }
+
+    public void addAttraction(String name, String workingHours, double price) {
+        if (attractionCount < attractions.length) {
+            attractions[attractionCount] = new Attraction(name, workingHours, price);
+            attractionCount++;
+        } else {
+            System.out.println("Нет места для нового аттракциона!");
+        }
+    }
+
+    public void printAllAttractions() {
+        System.out.println("Аттракционы \"" + parkName + "\":");
+        for (int i = 0; i < attractionCount; i++) {
+            attractions[i].printInfo();
+            System.out.println();
+        }
     }
 
     public class Attraction {

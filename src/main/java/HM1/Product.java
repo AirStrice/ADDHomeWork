@@ -1,4 +1,4 @@
-public class Products {
+public class Product {
 
     private String name;
     private String productionDate;
@@ -7,7 +7,7 @@ public class Products {
     private double price;
     private boolean isReserved;
 
-    public Products(String name, String productionDate, String manufacturer, String country, double price, boolean isReserved) {
+    public Product(String name, String productionDate, String manufacturer, String country, double price, boolean isReserved) {
         this.name = name;
         this.productionDate = productionDate;
         this.manufacturer = manufacturer;

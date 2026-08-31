@@ -63,12 +63,10 @@ public class Main {
             System.err.println("Ошибка данных: " + e.getMessage());
         }
 
-        System.out.println("\n--- ArrayIndexOutOfBoundsException ---");
         try {
             ArrayExceptionDemo.generateError();
         } catch (ArrayIndexOutOfBoundsException e) {
             System.err.println("Поймано в main: " + e.getMessage());
         }
-        System.out.println("Программа продолжает работу.");
     }
 }

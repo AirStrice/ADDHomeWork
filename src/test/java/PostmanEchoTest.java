@@ -13,7 +13,6 @@ public class PostmanEchoTest {
         RestAssured.baseURI = "https://postman-echo.com";
     }
 
-    // === GET ===
     @Test
     void testGet() {
         Response response = given()
@@ -28,7 +27,6 @@ public class PostmanEchoTest {
         assertEquals("https://postman-echo.com/get", response.jsonPath().getString("url"));
     }
 
-    // === POST ===
     @Test
     void testPost() {
         Response response = given()
@@ -49,7 +47,6 @@ public class PostmanEchoTest {
         assertEquals("https://postman-echo.com/post", response.jsonPath().getString("url"));
     }
 
-    // === PUT ===
     @Test
     void testPut() {
         Response response = given()
@@ -70,7 +67,6 @@ public class PostmanEchoTest {
         assertEquals("https://postman-echo.com/put", response.jsonPath().getString("url"));
     }
 
-    // === PATCH ===
     @Test
     void testPatch() {
         Response response = given()
@@ -91,7 +87,6 @@ public class PostmanEchoTest {
         assertEquals("https://postman-echo.com/patch", response.jsonPath().getString("url"));
     }
 
-    // === DELETE ===
     @Test
     void testDelete() {
         Response response = given()

@@ -1,4 +1,4 @@
-package Lesson_7_junit_5;
+package Lesson_7_junit_5NG;
 
 public class TriangleArea {
     public static double calculate(double a, double b, double c) {

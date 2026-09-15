@@ -3,7 +3,6 @@ package pages;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -20,6 +19,7 @@ public class PaymentWidgetPage {
     public PaymentWidgetPage(WebDriver driver, WebDriverWait wait) {
         this.driver = driver;
         this.wait = wait;
+
         wait.withTimeout(Duration.ofSeconds(25)).until(d -> {
             try {
                 String t = d.findElement(By.tagName("body")).getText();
@@ -45,7 +45,6 @@ public class PaymentWidgetPage {
         if (m.find()) {
             return m.group(1);
         }
-
         List<WebElement> els = driver.findElements(By.xpath("//*[contains(text(),'BYN')]"));
         for (WebElement el : els) {
             String t = el.getText();
@@ -94,7 +93,8 @@ public class PaymentWidgetPage {
             }
         }
         String body = getPageText();
-        for (String expected : List.of("Номер карты", "Срок действия", "CVC", "Имя и фамилия на карте", "Имя и фамилия")) {
+        for (String expected : List.of(
+                "Номер карты", "Срок действия", "CVC", "Имя и фамилия на карте", "Имя и фамилия")) {
             if (body.contains(expected)) {
                 list.add(expected);
             }
@@ -104,9 +104,9 @@ public class PaymentWidgetPage {
 
     public boolean hasPaymentSystemIcons() {
         List<WebElement> icons = driver.findElements(By.xpath(
-                "//img[contains(translate(@alt,'VISA','visa'),'visa') " +
-                        "or contains(translate(@alt,'MASTER','master'),'master') " +
-                        "or contains(@src,'visa') or contains(@src,'master') or contains(@src,'belkart')]"
+                "//img[contains(translate(@alt,'VISA','visa'),'visa') "
+                        + "or contains(translate(@alt,'MASTER','master'),'master') "
+                        + "or contains(@src,'visa') or contains(@src,'master') or contains(@src,'belkart')]"
                         + " | //*[contains(@class,'visa') or contains(@class,'mastercard')]"
         ));
         if (!icons.isEmpty()) {

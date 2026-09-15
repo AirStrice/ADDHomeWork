@@ -16,13 +16,13 @@ public class PaymentBlockPage {
     private static final String BASE_URL = "https://www.mts.by/";
 
     private final By paySection = By.id("pay-section");
-    private final By selectHeader = By.xpath("//div[@id='pay-section']//button[contains(@class,'select__header')] | //div[@id='pay-section']//span[contains(@class,'select__now')]");
     private final By moreAboutLink = By.xpath("//a[contains(.,'Подробнее о сервисе')]");
-    private final By cookieAccept = By.xpath("//button[contains(.,'ПРИНЯТЬ') or contains(.,'Принять') or contains(.,'Согласен')]");
+    private final By cookieAccept = By.xpath(
+            "//button[contains(.,'ПРИНЯТЬ') or contains(.,'Принять') or contains(.,'Согласен')]");
     private final By paymentLogos = By.xpath(
-            "//div[@id='pay-section']//img[contains(@src,'visa') or contains(@src,'mastercard') " +
-                    "or contains(@src,'belkart') or contains(@alt,'Visa') or contains(@alt,'Master') " +
-                    "or contains(@alt,'Белкарт') or contains(@alt,'belkart')]");
+            "//div[@id='pay-section']//img[contains(@src,'visa') or contains(@src,'mastercard') "
+                    + "or contains(@src,'belkart') or contains(@alt,'Visa') or contains(@alt,'Master') "
+                    + "or contains(@alt,'Белкарт') or contains(@alt,'belkart')]");
     private final By paymentIframe = By.cssSelector("iframe.payment-widget-iframe");
 
     public PaymentBlockPage(WebDriver driver) {
@@ -76,7 +76,8 @@ public class PaymentBlockPage {
 
     public void selectPaymentType(String optionText) {
         WebElement header = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//div[@id='pay-section']//*[contains(@class,'select__header') or contains(@class,'select__now')]")));
+                By.xpath("//div[@id='pay-section']//*[contains(@class,'select__header') "
+                        + "or contains(@class,'select__now')]")));
         header.click();
         try {
             Thread.sleep(300);
@@ -84,34 +85,15 @@ public class PaymentBlockPage {
         }
 
         WebElement item = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//div[@id='pay-section']//li[contains(@class,'select__item')]//*[contains(text(),'" + optionText + "')]"
-                        + " | //div[@id='pay-section']//li[contains(@class,'select__item') and contains(.,'" + optionText + "')]")));
+                By.xpath("//div[@id='pay-section']//li[contains(@class,'select__item')]"
+                        + "//*[contains(text(),'" + optionText + "')] "
+                        + "| //div[@id='pay-section']//li[contains(@class,'select__item') "
+                        + "and contains(.,'" + optionText + "')]")));
         item.click();
         try {
             Thread.sleep(400);
         } catch (InterruptedException ignored) {
         }
-    }
-
-    public Map<String, String> getVisiblePlaceholders() {
-        Map<String, String> result = new HashMap<>();
-        // берём input внутри открытой формы .pay-form.opened, иначе все видимые в секции
-        List<WebElement> inputs = driver.findElements(
-                By.xpath("//div[@id='pay-section']//form[contains(@class,'opened')]//input[@placeholder]"
-                        + " | //div[@id='pay-section']//form[contains(@class,'pay-form')]//input[@placeholder]"));
-
-        for (WebElement input : inputs) {
-            try {
-                if (!input.isDisplayed()) continue;
-                String ph = input.getAttribute("placeholder");
-                String id = input.getAttribute("id");
-                if (ph != null && !ph.isEmpty()) {
-                    result.put(id != null ? id : ph, ph);
-                }
-            } catch (StaleElementReferenceException ignored) {
-            }
-        }
-        return result;
     }
 
     public Map<String, String> getPlaceholdersForForm(String formId) {
@@ -160,7 +142,8 @@ public class PaymentBlockPage {
         if (continueBtn == null) {
             throw new NoSuchElementException("Кнопка «ПРОДОЛЖИТЬ» не найдена");
         }
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", continueBtn);
+        ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].scrollIntoView({block:'center'});", continueBtn);
         try {
             continueBtn.click();
         } catch (Exception e) {
@@ -171,6 +154,17 @@ public class PaymentBlockPage {
     public PaymentWidgetPage waitForPaymentWidget() {
         wait.until(ExpectedConditions.presenceOfElementLocated(paymentIframe));
         WebElement iframe = wait.until(ExpectedConditions.visibilityOfElementLocated(paymentIframe));
+
+        wait.until(d -> {
+            WebElement f = d.findElement(paymentIframe);
+            return f.getSize().getHeight() > 100 && f.getSize().getWidth() > 100;
+        });
+
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException ignored) {
+        }
+
         driver.switchTo().frame(iframe);
         return new PaymentWidgetPage(driver, wait);
     }

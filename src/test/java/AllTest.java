@@ -1,67 +1,55 @@
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-import Lesson_7_junit_5.Factorial;
-import Lesson_7_junit_5.TriangleArea;
-import Lesson_7_junit_5.Calculator;
-import Lesson_7_junit_5.NumberComparator;
+import org.testng.annotations.Test;
+import static org.testng.Assert.*;
 
 public class AllTest {
 
-    @DisplayName("факториал числа 1")
-    @Test
+    @Test(description = "факториал числа")
     void factorialOfZero() {
-        assertEquals(1, Factorial.calculate(0));
+        assertEquals(Factorial.calculate(0), 1);
     }
-    @DisplayName("факториал числа 120")
-    @Test
+
+    @Test(description = "факториал числа")
     void factorialOfPositive() {
-        assertEquals(120, Factorial.calculate(5));
+        assertEquals(Factorial.calculate(5), 120);
     }
 
-    @DisplayName("площадь треугольника")
-    @Test
+    @Test(description = "площадь треугольника")
     void triangleAreaValid() {
-        assertEquals(6.0, TriangleArea.calculate(3, 4, 5), 0.0001);
+        assertEquals(TriangleArea.calculate(3, 4, 5), 6.0, 0.0001);
     }
 
-    @DisplayName("сложение")
-    @Test
+    @Test(description = "сложение")
     void calculatorAdd() {
-        assertEquals(5, Calculator.add(2, 3));
+        assertEquals(Calculator.add(2, 3), 5);
     }
 
-    @DisplayName("вычитание")
-    @Test
+    @Test(description = "вычитание")
     void calculatorSubtract() {
-        assertEquals(1, Calculator.subtract(3, 2));
+        assertEquals(Calculator.subtract(3, 2), 1);
     }
 
-    @DisplayName("умножение")
-    @Test
+    @Test(description = "умножение")
     void calculatorMultiply() {
-        assertEquals(6, Calculator.multiply(2, 3));
+        assertEquals(Calculator.multiply(2, 3), 6);
     }
 
-    @DisplayName("деление")
-    @Test
+    @Test(description = "деление")
     void calculatorDivide() {
-        assertEquals(2, Calculator.divide(6, 3));
+        assertEquals(Calculator.divide(6, 3), 2);
     }
 
-    @DisplayName("Сравнение >")
-    @Test
+    @Test(description = "Сравнение >")
     void comparatorGreater() {
-        assertEquals("5 > 3", NumberComparator.compare(5, 3));
+        assertEquals(NumberComparator.compare(5, 3), "5 > 3");
     }
-    @DisplayName("Сравнение <")
-    @Test
+
+    @Test(description = "Сравнение <")
     void comparatorLess() {
-        assertEquals("3 < 5", NumberComparator.compare(3, 5));
+        assertEquals(NumberComparator.compare(3, 5), "3 < 5");
     }
-    @DisplayName("Сравнение =")
-    @Test
+
+    @Test(description = "Сравнение =")
     void comparatorEqual() {
-        assertEquals("5 == 5", NumberComparator.compare(5, 5));
+        assertEquals(NumberComparator.compare(5, 5), "5 == 5");
     }
 }

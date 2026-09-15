@@ -1,5 +1,9 @@
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
+import Lesson_7_junit_5.Factorial;
+import Lesson_7_junit_5.TriangleArea;
+import Lesson_7_junit_5.Calculator;
+import Lesson_7_junit_5.NumberComparator;
 
 public class AllTest {
 

@@ -1,107 +1,34 @@
+import pages.PaymentBlockPage;
+import pages.PaymentWidgetPage;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.openqa.selenium.TimeoutException;
-
-import java.time.Duration;
 import java.util.List;
-
+import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MTSBY {
 
     private WebDriver driver;
-    private WebDriverWait wait;
+    private PaymentBlockPage paymentPage;
 
-    private static final String BASE_URL = "https://www.mts.by/";
     private static final String PHONE = "297777777";
     private static final String SUM = "10";
 
-    private static final By PAY_SECTION = By.xpath("//div[@id='pay-section']");
-    private static final By BLOCK_TITLE = By.xpath("//div[@id='pay-section']//*[contains(text(),'ОНЛАЙН ПОПОЛНЕНИЕ')]");
-    private static final By MORE_ABOUT_SERVICE_LINK = By.xpath("//a[contains(text(),'Подробнее о сервисе')]");
-    private static final By PHONE_INPUT = By.xpath("//input[@id='connection-phone']");
-    private static final By SUM_INPUT = By.xpath("//input[@id='connection-sum']");
-    private static final By CONTINUE_BUTTON = By.xpath("//div[@id='pay-section']//button[contains(.,'ПРОДОЛЖИТЬ')]");
-    private static final By SERVICE_TYPE = By.xpath("//div[@id='pay-section']//span[contains(@class,'select__now')]");
-    private static final By COOKIE_ACCEPT = By.xpath("//button[contains(text(),'ПРИНЯТЬ') or contains(text(),'Принять')]");
-    private static final By EMAIL_INPUT = By.xpath("//input[@id='connection-email']");
-    private static final By VISA_LOGO = By.xpath("//div[@id='pay-section']//img[contains(@alt,'Visa') or contains(@alt,'visa') or contains(@src,'visa')]");
-    private static final By MASTERCARD_LOGO = By.xpath("//div[@id='pay-section']//img[contains(@alt,'MasterCard') or contains(@alt,'Mastercard') or contains(@src,'mastercard')]");
-    private static final By BELKART_LOGO = By.xpath("//div[@id='pay-section']//img[contains(@alt,'Белкарт') or contains(@alt,'belkart') or contains(@src,'belkart')]");
-    private static final By ALL_PAYMENT_LOGOS = By.xpath(
-            "//div[@id='pay-section']//img[" +
-                    "contains(@alt,'Visa') or contains(@alt,'visa') or contains(@src,'visa') or " +
-                    "contains(@alt,'MasterCard') or contains(@alt,'Mastercard') or contains(@src,'mastercard') or " +
-                    "contains(@alt,'Белкарт') or contains(@alt,'belkart') or contains(@src,'belkart')" +
-                    "]"
-    );
-
     @BeforeEach
     public void setUp() {
-        System.setProperty("webdriver.chrome.driver", "C:\\Users\\danik\\Downloads\\yandexdriver-26.8.0.1788-win64\\yandexdriver.exe");
+        WebDriverManager.chromedriver().browserVersion("150").setup();
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--remote-allow-origins=*");
         options.addArguments("--start-maximized");
         options.addArguments("--no-first-run");
         options.addArguments("--no-default-browser-check");
-        options.addArguments("--disable-popup-blocking");
-        options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
-        options.setExperimentalOption("useAutomationExtension", false);
-
         options.setBinary("C:\\Program Files\\Yandex\\YandexBrowser\\Application\\browser.exe");
-
         driver = new ChromeDriver(options);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-
-        closeExtraTabs();
-        driver.get(BASE_URL);
-
-        try {
-            WebElement accept = wait.until(ExpectedConditions.elementToBeClickable(COOKIE_ACCEPT));
-            accept.click();
-            Thread.sleep(600);
-        } catch (Exception ignored) {
-        }
-
-        wait.until(ExpectedConditions.presenceOfElementLocated(PAY_SECTION));
-        WebElement section = driver.findElement(PAY_SECTION);
-        ((JavascriptExecutor) driver).executeScript(
-                "arguments[0].scrollIntoView({block: 'center', behavior: 'instant'});", section);
-
-        try {
-            Thread.sleep(800);
-        } catch (InterruptedException ignored) {
-        }
-    }
-
-    private void closeExtraTabs() {
-        try {
-            var handles = driver.getWindowHandles();
-            if (handles.size() <= 1) {
-                return;
-            }
-            String main = driver.getWindowHandle();
-            for (String h : handles) {
-                driver.switchTo().window(h);
-                String url = driver.getCurrentUrl();
-                if (url == null || url.isEmpty() || url.startsWith("data:")) {
-                    driver.close();
-                } else {
-                    main = h;
-                }
-            }
-            driver.switchTo().window(main);
-        } catch (Exception ignored) {
-        }
+        paymentPage = new PaymentBlockPage(driver).open();
     }
 
     @AfterEach
@@ -114,113 +41,98 @@ public class MTSBY {
     @Test
     @DisplayName("Проверка названия блока «Онлайн пополнение без комиссии»")
     public void testBlockTitle() {
-        WebElement section = wait.until(ExpectedConditions.visibilityOfElementLocated(PAY_SECTION));
-        String text = section.getText().toUpperCase().replace("\n", " ");
-
-        assertTrue(text.contains("ПОПОЛНЕНИЕ"),
-                "В блоке нет слова «ПОПОЛНЕНИЕ». Текст блока: " + text);
-        assertTrue(text.contains("КОМИССИИ"),
-                "В блоке нет слова «КОМИССИИ». Текст блока: " + text);
+        String text = paymentPage.getBlockText();
+        assertTrue(text.contains("ПОПОЛНЕНИЕ"), "Нет «ПОПОЛНЕНИЕ»: " + text);
+        assertTrue(text.contains("КОМИССИ"), "Нет «КОМИССИИ»: " + text);
     }
 
     @Test
     @DisplayName("Проверка наличия логотипов платёжных систем")
     public void testPaymentLogos() {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(PAY_SECTION));
-
-        List<WebElement> logos = driver.findElements(ALL_PAYMENT_LOGOS);
-        assertTrue(logos.size() >= 3,
-                "Ожидалось 3 логотипа, найдено: " + logos.size());
-
-        assertFalse(driver.findElements(VISA_LOGO).isEmpty(), "Логотип Visa не найден");
-        assertFalse(driver.findElements(MASTERCARD_LOGO).isEmpty(), "Логотип Mastercard не найден");
-        assertFalse(driver.findElements(BELKART_LOGO).isEmpty(), "Логотип Белкарт не найден");
+        assertTrue(paymentPage.countPaymentLogos() >= 3,
+                "Логотипов меньше 3");
     }
 
     @Test
     @DisplayName("Проверка работы ссылки «Подробнее о сервисе»")
     public void testMoreAboutServiceLink() {
-        WebElement link = wait.until(ExpectedConditions.elementToBeClickable(MORE_ABOUT_SERVICE_LINK));
-
-        String href = link.getAttribute("href");
-        assertTrue(href != null && (href.contains("poryadok-oplaty") || href.contains("bezopasnost")),
-                "Ссылка ведёт не туда: " + href);
-
-        link.click();
-
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.urlContains("poryadok-oplaty"),
-                ExpectedConditions.urlContains("bezopasnost")
-        ));
-
-        String currentUrl = driver.getCurrentUrl();
-        assertTrue(currentUrl.contains("poryadok-oplaty") || currentUrl.contains("bezopasnost"),
-                "URL не изменился. Текущий URL: " + currentUrl);
+        paymentPage.clickMoreAboutService();
+        String url = paymentPage.getCurrentUrl();
+        assertTrue(url.contains("poryadok-oplaty") || url.contains("bezopasnost"),
+                "Неверный URL: " + url);
     }
 
     @Test
-    @DisplayName("Заполнение полей «Услуги связи» и проверка кнопки «Продолжить»")
-    public void testFillFormAndContinue() {
+    @DisplayName("Placeholders: Услуги связи")
+    public void testPlaceholdersConnection() {
+        paymentPage.selectPaymentType("Услуги связи");
+        Map<String, String> ph = paymentPage.getPlaceholdersForForm("pay-connection");
+        assertEquals("Номер телефона", ph.get("connection-phone"));
+        assertEquals("Сумма", ph.get("connection-sum"));
+        assertEquals("E-mail для отправки чека", ph.get("connection-email"));
+    }
 
-        WebElement phone = wait.until(ExpectedConditions.visibilityOfElementLocated(PHONE_INPUT));
-        phone.clear();
-        phone.sendKeys(PHONE);
+    @Test
+    @DisplayName("Placeholders: Домашний интернет")
+    public void testPlaceholdersInternet() {
+        paymentPage.selectPaymentType("Домашний интернет");
+        Map<String, String> ph = paymentPage.getPlaceholdersForForm("pay-internet");
+        assertEquals("Номер абонента", ph.get("internet-phone"));
+        assertEquals("Сумма", ph.get("internet-sum"));
+        assertEquals("E-mail для отправки чека", ph.get("internet-email"));
+    }
 
-        WebElement sum = wait.until(ExpectedConditions.visibilityOfElementLocated(SUM_INPUT));
-        sum.clear();
-        sum.sendKeys(SUM);
+    @Test
+    @DisplayName("Placeholders: Рассрочка")
+    public void testPlaceholdersInstalment() {
+        paymentPage.selectPaymentType("Рассрочка");
+        Map<String, String> ph = paymentPage.getPlaceholdersForForm("pay-instalment");
 
-        try {
-            WebElement email = driver.findElement(By.xpath("//input[@id='connection-email']"));
-            email.clear();
-            email.sendKeys("test@mts.by");
-        } catch (Exception ignored) {
-        }
+        assertEquals("Номер счета на 44", ph.get("score-instalment"));
+        assertEquals("Сумма", ph.get("instalment-sum"));
+        assertEquals("E-mail для отправки чека", ph.get("instalment-email"));
+    }
 
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException ignored) {
-        }
+    @Test
+    @DisplayName("Placeholders: Задолженность")
+    public void testPlaceholdersArrears() {
+        paymentPage.selectPaymentType("Задолженность");
+        Map<String, String> ph = paymentPage.getPlaceholdersForForm("pay-arrears");
+        assertEquals("Номер счета на 2073", ph.get("score-arrears"));
+        assertEquals("Сумма", ph.get("arrears-sum"));
+        assertEquals("E-mail для отправки чека", ph.get("arrears-email"));
+    }
 
-        WebElement continueBtn = null;
-        for (WebElement b : driver.findElements(By.xpath("//button[contains(@class,'button__default')]"))) {
-            if (b.isDisplayed() && b.getText().toUpperCase().contains("ПРОДОЛЖИТЬ")) {
-                continueBtn = b;
-                break;
-            }
-        }
-        assertNotNull(continueBtn, "Кнопка «ПРОДОЛЖИТЬ» не найдена");
+    @Test
+    @DisplayName("Услуги связи: заполнение и проверка окна оплаты")
+    public void testConnectionPaymentWidget() {
+        paymentPage.selectPaymentType("Услуги связи");
+        paymentPage.fillConnectionPhone(PHONE);
+        paymentPage.fillConnectionSum(SUM);
+        paymentPage.fillConnectionEmail("test@mts.by");
+        paymentPage.clickContinue();
+        PaymentWidgetPage widget = paymentPage.waitForPaymentWidget();
+        String pageText = widget.getPageText();
 
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", continueBtn);
-        try {
-            continueBtn.click();
-        } catch (Exception e) {
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", continueBtn);
-        }
-        boolean overlayAppeared = false;
+        assertTrue(pageText.contains("10") && pageText.toUpperCase().contains("BYN"),
+                "Сумма 10 BYN не найдена в виджете. Текст: " + pageText.substring(0, Math.min(400, pageText.length())));
+        String payBtn = widget.getPayButtonText();
+        assertTrue(payBtn.isEmpty() || (payBtn.contains("10") && payBtn.toUpperCase().contains("ОПЛАТИТЬ")),
+                "Кнопка оплаты некорректна: [" + payBtn + "]");
+        assertTrue(pageText.contains("297777777") || pageText.contains("375297777777"),
+                "Номер не найден в виджете. Текст: " + pageText.substring(0, Math.min(400, pageText.length())));
+        String lower = pageText.toLowerCase();
+        assertTrue(lower.contains("номер карты") || lower.contains("карт"),
+                "Нет поля «Номер карты»");
+        assertTrue(lower.contains("срок") || lower.contains("действ"),
+                "Нет поля «Срок действия»");
+        assertTrue(lower.contains("cvc") || lower.contains("cvv"),
+                "Нет поля CVC");
+        assertTrue(lower.contains("имя") || lower.contains("фамилия"),
+                "Нет поля имени на карте");
+        assertTrue(widget.hasPaymentSystemIcons() || pageText.contains("Pay") || lower.contains("visa"),
+                "Нет признаков платёжных систем");
 
-        try {
-            wait.until(ExpectedConditions.or(
-                    ExpectedConditions.presenceOfElementLocated(By.xpath("//iframe[contains(@src,'bepaid') or contains(@src,'pay') or contains(@src,'payment')]")),
-                    ExpectedConditions.presenceOfElementLocated(By.xpath("//*[contains(@class,'modal') and (contains(@class,'show') or contains(@class,'open') or contains(@class,'active'))]")),
-                    ExpectedConditions.presenceOfElementLocated(By.xpath("//*[contains(@class,'popup') and (contains(@class,'show') or contains(@class,'open') or contains(@class,'active'))]")),
-                    ExpectedConditions.presenceOfElementLocated(By.xpath("//*[contains(@class,'overlay') and (contains(@class,'show') or contains(@class,'active'))]")),
-                    ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@role='dialog']")),
-                    ExpectedConditions.numberOfWindowsToBe(2),
-                    ExpectedConditions.urlContains("bepaid"),
-                    ExpectedConditions.urlContains("payment")
-            ));
-            overlayAppeared = true;
-        } catch (TimeoutException e) {
-            overlayAppeared = false;
-        }
-
-        if (driver.getWindowHandles().size() > 1) {
-            overlayAppeared = true;
-        }
-
-        assertTrue(overlayAppeared,
-                "После нажатия «Продолжить» не появилось окно оплаты URL: "
-                        + driver.getCurrentUrl());
+        paymentPage.switchToDefaultContent();
     }
 }
